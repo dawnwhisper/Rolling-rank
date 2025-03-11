@@ -1,0 +1,5 @@
+id,oauth_id,name,password,email,type,secret,website,affiliation,country,bracket,hidden,banned,verified,team_id,created
+1,,admin,"$bcrypt-sha256$2b,12$uLwqFQyb3fe4QtF.cN/oLO$PLdLpZprBahSSZIiQYpEiHIgSANF29e",admin@163.com,admin,,,,,,True,False,False,,2025-02-22 07:06:22.948570
+2,,user1,"$bcrypt-sha256$2b,12$Xxmu3dKc/taPPQI.XqgCWO$q36Z96HW6Mg4SkD0.3NZaMPnuxeqcsO",user1@163.com,user,,,中国,CN,,False,False,False,,2025-02-22 07:10:09.378715
+3,,user2,"$bcrypt-sha256$2b,12$0/g2hpji.xyc5ufl/5Dewe$uZhMpj33il1GBzb/nvhoPN/q1KDwAmm",user2@163.com,user,,,中国,CN,,False,False,False,,2025-02-22 07:10:18.242137
+4,,user3,"$bcrypt-sha256$2b,12$GhcWGSwIB9cERhGcyW22Ye$mWBQmuQHTX4gc7oma6WLx3WuN83XC.e",user3@163.com,user,,,中国,CN,,False,False,False,,2025-02-22 07:10:25.987820

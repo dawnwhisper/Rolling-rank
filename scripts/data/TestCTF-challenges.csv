@@ -1,0 +1,5 @@
+id,name,description,max_attempts,value,category,type,state,requirements
+1,q1,,0,200,Crypto,standard,visible,
+2,q2,,0,800,Crypto,dynamic_docker,visible,
+3,q3,,0,1000,Crypto,dynamic,visible,
+4,q4,,0,1000,Crypto,dynamic_docker,visible,

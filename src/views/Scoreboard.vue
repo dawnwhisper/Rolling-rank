@@ -2,7 +2,6 @@
     <div class="scoreboard-container">
         <div class="cyber-header">
             <h1 class="cyber-title">Scoreboard</h1>
-            <!-- <div class="refresh-timer">下次更新: {{ refreshCountdown }}s</div> -->
         </div>
         
         <div class="table-wrapper">
@@ -34,6 +33,7 @@
 
 <script>
 import TeamScoreRow from '../components/TeamScoreRow.vue'
+import teamsData from '../assets/data.json'
 
 export default {
     name: 'Scoreboard',
@@ -42,12 +42,9 @@ export default {
     },
     data() {
         return {
-            teams: 
-            [{"name": "user1", "solved": 4, "total": 4, "ctfScore": 500, "kohScore": 600}, {"name": "user2", "solved": 1, "total": 4, "ctfScore": 200, "kohScore": 100}, {"name": "user3", "solved": 0, "total": 4, "ctfScore": 0, "kohScore": 1000}]
-            ,
+            teams: teamsData,
             sortKey: 'totalScore',
             sortAsc: false,
-            refreshCountdown: 30,
             visibleKohScores: new Set()
         }
     },
@@ -61,14 +58,6 @@ export default {
         }
     },
     methods: {
-        startRefreshTimer() {
-            setInterval(() => {
-                this.refreshCountdown = this.refreshCountdown > 0 ? this.refreshCountdown - 1 : 30
-                if (this.refreshCountdown === 0) {
-                    this.fetchData()
-                }
-            }, 1000)
-        },
         async fetchData() {
             try {
                 // 实际使用时替换为真实的API调用

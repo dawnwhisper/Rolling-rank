@@ -1,0 +1,47 @@
+[
+    {
+      "name": "user1",
+      "solved": 4,
+      "total": 4,
+      "ctfScore": 2000,
+      "kohScore": 200,
+      "totalScore": 2000,
+      "lightSubmit": [],
+      "maxSubmit": 0
+    },
+    {
+      "name": "user2",
+      "solved": 1,
+      "total": 4,
+      "ctfScore": 200,
+      "kohScore": 900,
+      "totalScore": 200,
+      "lightSubmit": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "maxSubmit": 1
+    },
+    {
+      "name": "user3",
+      "solved": 0,
+      "total": 4,
+      "ctfScore": 0,
+      "kohScore": 500,
+      "totalScore": 0,
+      "lightSubmit": [
+        [
+          2,
+          1000
+        ],
+        [
+          4,
+          1300
+        ]
+      ],
+      "maxSubmit": 5
+    }
+  ]
+  

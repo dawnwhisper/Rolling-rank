@@ -12,22 +12,8 @@
     <td class="score ctf-score" @click="showLightSubmits">
       <div class="score-container">
         <div class="score-value">{{ teamData.ctfScore }}</div>
-        <div v-for="bubble in activeBubbles" 
-             :key="bubble.id"
-             class="submit-bubble" 
-             :class="{ 'bubble-animate': bubble.isAnimating }"
-             :style="{ 
-               '--random-x1': bubble.x1 + 'px',
-               '--random-x2': bubble.x2 + 'px',
-               '--random-x3': bubble.x3 + 'px',
-               '--random-rotate': bubble.rotate + 'deg',
-               '--random-scale': bubble.scale
-             }">
-          {{ bubble.content }}
-        </div>
-        <div v-if="teamData.maxSubmit > currentSubmitIndex && !isPlayingAnimation" 
-             class="submit-bubble">
-          {{ remainingSubmits }}
+        <div v-if="teamData.maxSubmit > 0" class="submit-bubble" :class="{ 'bubble-animate': isAnimating }">
+          {{ isAnimating ? currentBubbleContent : remainingSubmits }}
         </div>
       </div>
     </td>
@@ -70,16 +56,7 @@ export default {
       animationQueue: [],
       hasPlayedAnimation: false,  // 新增标志位
       initialCtfScore: 0,
-      hasInitialized: false,
-      isResetting: false,
-      randomX1: 0,
-      randomX2: 0,
-      randomX3: 0,
-      randomRotate: 0,
-      randomScale: 1,
-      bubbleId: 0,
-      activeBubbles: [],
-      isPlayingAnimation: false
+      hasInitialized: false
     }
   },
   computed: {
@@ -100,104 +77,37 @@ export default {
         showKoh: !this.showKohScore
       });
     },
-    getRandomOffset() {
-      return Math.random() * 60 - 30; // 生成-30到30之间的随机数
-    },
-    getRandomRotate() {
-      return Math.random() * 360;
-    },
-    getRandomScale() {
-      return 1.5 + Math.random() * 1;
-    },
-    async resetBubble() {
-      this.isResetting = true;
-      this.randomX1 = this.getRandomOffset();
-      this.randomX2 = this.getRandomOffset();
-      this.randomX3 = this.getRandomOffset();
-      this.randomRotate = this.getRandomRotate();
-      this.randomScale = this.getRandomScale();
-      await new Promise(resolve => setTimeout(resolve, 100));
-      this.isResetting = false;
-    },
-    createBubble(content, delay = 0) {
-      setTimeout(() => {
-        const bubble = {
-          id: this.bubbleId++,
-          content,
-          isAnimating: true,
-          x1: this.getRandomOffset(),
-          x2: this.getRandomOffset(),
-          x3: this.getRandomOffset(),
-          rotate: this.getRandomRotate(),
-          scale: this.getRandomScale()
-        };
-        this.activeBubbles.push(bubble);
-        // 修改气泡存在时间为1秒
-        setTimeout(() => {
-          this.activeBubbles = this.activeBubbles.filter(b => b.id !== bubble.id);
-        }, 1000);
-        return bubble;
-      }, delay);
-    },
-
     async showLightSubmits() {
-      if (!this.teamData.lightSubmit || 
+      if (this.isAnimating || !this.teamData.lightSubmit || 
+          this.teamData.maxSubmit === 0 || 
           this.currentSubmitIndex >= this.teamData.maxSubmit) return;
-      
-      this.isPlayingAnimation = true;
       
       if (!this.hasInitialized) {
         this.initialCtfScore = this.teamData.ctfScore;
         this.hasInitialized = true;
       }
 
-      let firstAnimation = true;
-      let lastErrorDelay = 0;
-      let wrong = 0;
+      this.isAnimating = true;
+      this.currentSubmitIndex++;
+      
+      const submission = this.teamData.lightSubmit.find(s => s[0] === this.currentSubmitIndex);
+      
+      if (submission) {
+        this.currentBubbleContent = `+${submission[1]}`;
+        // 等待动画完成
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        // 更新分数和进度
+        this.teamData.ctfScore = this.initialCtfScore + 
+          this.teamData.lightSubmit
+            .filter(s => s[0] <= this.currentSubmitIndex)
+            .reduce((sum, s) => sum + s[1], 0);
+        this.teamData.solved += 1;
+      } else {
+        this.currentBubbleContent = 'Failed';
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
 
-      // 找到下一个正确提交
-      const nextCorrectSubmission = this.teamData.lightSubmit.find(s => s[0] > this.currentSubmitIndex);
-      
-      // 如果没有下一个正确提交，播放剩余的错误提交
-      if (!nextCorrectSubmission) {
-        while (this.currentSubmitIndex < this.teamData.maxSubmit) {
-          this.currentSubmitIndex++;
-          const delay = firstAnimation ? 0 : (this.currentSubmitIndex - 1) * 500;
-          this.createBubble('Failed', delay);
-          lastErrorDelay = delay;
-          firstAnimation = false;
-        }
-        // 等待所有错误动画完成
-        await new Promise(resolve => setTimeout(resolve, lastErrorDelay + 1000));
-        this.isPlayingAnimation = false;
-        return;
-      }
-      
-      // 播放到下一个正确提交之前的错误提交
-      while (this.currentSubmitIndex < nextCorrectSubmission[0] - 1) {
-        wrong = 1;
-        this.currentSubmitIndex++;
-        const delay = firstAnimation ? 0 : (this.currentSubmitIndex - 1) * 500;
-        this.createBubble('Failed', delay);
-        lastErrorDelay = delay;
-        firstAnimation = false;
-      }
-      
-      // 播放正确提交
-      const delayBeforeCorrect = wrong === 0 ? 0 : lastErrorDelay + 500;
-      this.currentSubmitIndex = nextCorrectSubmission[0];
-      this.createBubble(`+${nextCorrectSubmission[1]}`, delayBeforeCorrect);
-      
-      // 等待所有动画完成后更新分数
-      await new Promise(resolve => setTimeout(resolve, delayBeforeCorrect + 1000));
-      
-      this.teamData.ctfScore = this.initialCtfScore + 
-        this.teamData.lightSubmit
-          .filter(s => s[0] <= this.currentSubmitIndex)
-          .reduce((sum, s) => sum + s[1], 0);
-      this.teamData.solved += 1;
-      
-      this.isPlayingAnimation = false;
+      this.isAnimating = false;
     }
   }
 }
@@ -331,12 +241,14 @@ export default {
   justify-content: center;
   font-size: 0.8em;
   font-weight: bold;
+  animation: bubble-pop 0.2s ease-out, bubble-float 2s ease-in-out infinite;
   box-shadow: 0 0 10px #ff0080;
   z-index: 2;
+  transition: content 0.3s ease;
 }
 
 .bubble-animate {
-  animation: bubble-rise 1s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  animation: bubble-rise 1s ease-out forwards;
 }
 
 @keyframes bubble-pop {
@@ -362,38 +274,16 @@ export default {
 
 @keyframes bubble-rise {
   0% {
-    transform: scale(1) translate(0, 0) rotate(0deg);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
-  25% {
-    transform: scale(calc(var(--random-scale) * 0.5)) 
-               translate(var(--random-x1), -100px)
-               rotate(calc(var(--random-rotate) * 0.25deg));
-    opacity: 0.9;
-  }
   50% {
-    transform: scale(calc(var(--random-scale) * 0.8)) 
-               translate(var(--random-x2), -200px)
-               rotate(calc(var(--random-rotate) * 0.5deg));
+    transform: scale(1.5) translateY(-20px);
     opacity: 0.8;
   }
-  75% {
-    transform: scale(calc(var(--random-scale) * 0.9))
-               translate(var(--random-x3), -300px)
-               rotate(calc(var(--random-rotate) * 0.75deg));
-    opacity: 0.7;
-  }
   100% {
-    transform: scale(var(--random-scale)) 
-               translate(calc(var(--random-x3) * 1.5), -400px)
-               rotate(var(--random-rotate));
+    transform: scale(2) translateY(-40px);
     opacity: 0;
   }
-}
-
-.bubble-reset {
-  transform: scale(1) translateY(0);
-  opacity: 1;
-  transition: none;
 }
 </style>

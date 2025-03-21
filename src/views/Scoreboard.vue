@@ -21,7 +21,7 @@
                         v-for="(team, index) in sortedTeams" 
                         :key="team.name"
                         :team-data="team"
-                        :rank="index + 1"
+                        :rank="team.nonCompeting ? '*' : calculateRank(team)"
                         :show-koh-score="visibleKohScores.has(team.name)"
                         @koh-score-toggle="handleKohScoreToggle"
                     />
@@ -51,8 +51,10 @@ export default {
     computed: {
         sortedTeams() {
             return [...this.teams].sort((a, b) => {
-                const aTotal = a.ctfScore + (this.visibleKohScores.has(a.name) ? a.kohScore : 0);
-                const bTotal = b.ctfScore + (this.visibleKohScores.has(b.name) ? b.kohScore : 0);
+                const ctfhighest = 2300;
+                const kohhighest = 900;                
+                const aTotal = a.ctfScore / ctfhighest * 1000 * 0.7 + (this.visibleKohScores.has(a.name) ? a.kohScore : 0) / kohhighest * 100 * 0.3;
+                const bTotal = b.ctfScore / ctfhighest * 1000 * 0.7 + (this.visibleKohScores.has(b.name) ? b.kohScore : 0) / kohhighest * 100 * 0.3;
                 return bTotal - aTotal;
             });
         }
@@ -75,6 +77,13 @@ export default {
                 newVisibleKohScores.delete(event.teamId);
             }
             this.visibleKohScores = newVisibleKohScores;
+        },
+        calculateRank(team) {
+            if (team.nonCompeting) return '*';
+            const position = this.sortedTeams
+                .filter(t => !t.nonCompeting)
+                .findIndex(t => t.name === team.name);
+            return position + 1;
         }
     },
     mounted() {

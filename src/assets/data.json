@@ -1,7 +1,7 @@
 [
     {
       "name": "user1",
-      "solved": 4,
+      "solved": 1,
       "total": 4,
       "ctfScore": 2000,
       "kohScore": 200,
@@ -13,23 +13,43 @@
       "name": "user2",
       "solved": 1,
       "total": 4,
-      "ctfScore": 200,
+      "ctfScore": 1000,
       "kohScore": 900,
-      "totalScore": 200,
+      "totalScore": 1000,
       "lightSubmit": [
         [
           1,
           1000
         ]
       ],
-      "maxSubmit": 1
+      "maxSubmit": 1,
+      "nonCompeting": true
     },
     {
       "name": "user3",
       "solved": 0,
       "total": 4,
       "ctfScore": 0,
-      "kohScore": 500,
+      "kohScore": 200,
+      "totalScore": 0,
+      "lightSubmit": [
+        [
+          2,
+          1000
+        ],
+        [
+          4,
+          1300
+        ]
+      ],
+      "maxSubmit": 5
+    },
+    {
+      "name": "user4",
+      "solved": 0,
+      "total": 4,
+      "ctfScore": 0,
+      "kohScore": 200,
       "totalScore": 0,
       "lightSubmit": [
         [

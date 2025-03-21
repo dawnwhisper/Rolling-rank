@@ -87,7 +87,13 @@ export default {
       return (this.teamData.solved / this.teamData.total) * 100
     },
     currentTotalScore() {
-      return this.teamData.ctfScore + (this.showKohScore ? this.teamData.kohScore : 0)
+      const ctfhighest = 2300;
+      const kohhighest = 900;
+      return parseFloat(
+        (
+          this.teamData.ctfScore / ctfhighest * 1000 * 0.7 + (this.showKohScore ? this.teamData.kohScore : 0) / kohhighest * 100 * 0.4
+        ).toFixed(3)
+      )
     },
     remainingSubmits() {
       return this.teamData.maxSubmit - this.currentSubmitIndex;

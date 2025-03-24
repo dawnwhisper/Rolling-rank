@@ -51,7 +51,7 @@ export default {
     computed: {
         sortedTeams() {
             return [...this.teams].sort((a, b) => {
-                const ctfhighest = 2300;
+                const ctfhighest = 2982;
                 const kohhighest = 900;                
                 const aTotal = a.ctfScore / ctfhighest * 1000 * 0.7 + (this.visibleKohScores.has(a.name) ? a.kohScore : 0) / kohhighest * 100 * 0.3;
                 const bTotal = b.ctfScore / ctfhighest * 1000 * 0.7 + (this.visibleKohScores.has(b.name) ? b.kohScore : 0) / kohhighest * 100 * 0.3;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Scoreboard from "./views/Scoreboard.vue";
+import './assets/theme.css';
 </script>
 
 <style>

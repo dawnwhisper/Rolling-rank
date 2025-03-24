@@ -1,5 +1,10 @@
 <template>
-  <tr class="team-score-row" :class="{ 'row-hover': isHovered }" @mouseover="isHovered = true" @mouseleave="isHovered = false">
+  <tr class="team-score-row" :class="{ 
+    'row-hover': isHovered,
+    'rank-top3': rank !== '*' && rank <= 3,
+    'rank-top7': rank !== '*' && rank > 3 && rank <= 7,
+    'rank-top15': rank !== '*' && rank > 7 && rank <= 15
+  }" @mouseover="isHovered = true" @mouseleave="isHovered = false">
     <td class="rank">{{ rank }}</td>
     <td class="team-name">{{ teamData.name }}</td>
     <td class="challenge-status">
@@ -87,7 +92,7 @@ export default {
       return (this.teamData.solved / this.teamData.total) * 100
     },
     currentTotalScore() {
-      const ctfhighest = 2300;
+      const ctfhighest = 2982;
       const kohhighest = 900;
       return parseFloat(
         (
@@ -210,11 +215,13 @@ export default {
 </script>
 
 <style scoped>
+@import '../assets/theme.css';
+
 .team-score-row {
   background: rgba(0, 0, 0, 0.8);
-  color: #0ff;
+  color: var(--cyber-primary);
   transition: all 0.3s ease;
-  border-bottom: 1px solid #0ff3;
+  border-bottom: 1px solid var(--cyber-primary-alpha);
 }
 
 .row-hover {
@@ -232,8 +239,8 @@ export default {
 
 .progress-container {
   width: 100%;
-  background: rgba(0, 255, 255, 0.1);
-  border: 1px solid #0ff3;
+  background: var(--cyber-primary-alpha);
+  border: 1px solid var(--cyber-primary-alpha);
   height: 20px;
 }
 
@@ -327,7 +334,7 @@ export default {
   position: absolute;
   top: -10px;
   right: -15px;
-  background: #ff0080;
+  background: var(--bubble-color);
   color: #fff;
   border-radius: 50%;
   width: 24px;
@@ -337,7 +344,7 @@ export default {
   justify-content: center;
   font-size: 0.8em;
   font-weight: bold;
-  box-shadow: 0 0 10px #ff0080;
+  box-shadow: 0 0 10px var(--bubble-glow);
   z-index: 2;
 }
 
@@ -401,5 +408,39 @@ export default {
   transform: scale(1) translateY(0);
   opacity: 1;
   transition: none;
+}
+
+/* 添加排名颜色样式 */
+.rank-top3 {
+  color: var(--rank-top3) !important;
+  text-shadow: 0 0 5px var(--rank-top3-glow) !important;
+}
+
+.rank-top3 .team-name,
+.rank-top3 .rank {
+  color: var(--rank-top3) !important;
+  text-shadow: 0 0 5px var(--rank-top3-glow) !important;
+}
+
+.rank-top7 {
+  color: var(--rank-top7) !important;
+  text-shadow: 0 0 5px var(--rank-top7-glow) !important;
+}
+
+.rank-top7 .team-name,
+.rank-top7 .rank {
+  color: var(--rank-top7) !important;
+  text-shadow: 0 0 5px var(--rank-top7-glow) !important;
+}
+
+.rank-top15 {
+  color: var(--rank-top15) !important;
+  text-shadow: 0 0 5px var(--rank-top15-glow) !important;
+}
+
+.rank-top15 .team-name,
+.rank-top15 .rank {
+  color: var(--rank-top15) !important;
+  text-shadow: 0 0 5px var(--rank-top15-glow) !important;
 }
 </style>

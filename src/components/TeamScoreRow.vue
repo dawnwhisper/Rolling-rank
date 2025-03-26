@@ -1,12 +1,15 @@
 <template>
-  <tr class="team-score-row" :class="{ 
-    'row-hover': isHovered,
-    'rank-top3': rank !== '*' && rank <= 3,
-    'rank-top7': rank !== '*' && rank > 3 && rank <= 7,
-    'rank-top15': rank !== '*' && rank > 7 && rank <= 15
-  }" @mouseover="isHovered = true" @mouseleave="isHovered = false">
-    <td class="rank">{{ rank }}</td>
-    <td class="team-name">{{ teamData.name }}</td>
+  <tr class="team-score-row" :class="[{ 'row-hover': isHovered }, rankColorClass]" @mouseover="isHovered = true" @mouseleave="isHovered = false">
+    <td class="rank" :class="rankColorClass">{{ rank }}</td>
+    <td class="team-name" @click="showTeamPhoto">
+      {{ teamData.name }}
+      <div v-if="showPhotoModal" class="photo-modal" @click.stop="showPhotoModal = false">
+        <div class="modal-content">
+          <img :src="teamPhotoUrl" :alt="teamData.name" @error="handleImageError">
+          <span class="close-button" @click.stop="showPhotoModal = false">&times;</span>
+        </div>
+      </div>
+    </td>
     <td class="challenge-status">
       <div class="progress-container">
         <div class="progress-bar" :style="{ width: progressPercentage + '%' }">
@@ -84,7 +87,9 @@ export default {
       randomScale: 1,
       bubbleId: 0,
       activeBubbles: [],
-      isPlayingAnimation: false
+      isPlayingAnimation: false,
+      showPhotoModal: false,
+      imageError: false
     }
   },
   computed: {
@@ -102,6 +107,22 @@ export default {
     },
     remainingSubmits() {
       return this.teamData.maxSubmit - this.currentSubmitIndex;
+    },
+    teamPhotoUrl() {
+      return `/team-photos/${this.teamData.name}.jpg`
+    },
+    rankColorClass() {
+      if (typeof this.rank === 'string' && this.rank === '*') {
+        return 'non-competing';
+      }
+      if (this.rank <= 3) {
+        return 'rank-gold';
+      } else if (this.rank <= 7) {
+        return 'rank-silver';
+      } else if (this.rank <= 15) {
+        return 'rank-bronze';
+      }
+      return '';
     }
   },
   methods: {
@@ -209,19 +230,25 @@ export default {
       this.teamData.solved += 1;
       
       this.isPlayingAnimation = false;
+    },
+    showTeamPhoto() {
+      this.showPhotoModal = true;
+      this.imageError = false;
+    },
+    handleImageError() {
+      this.imageError = true;
+      this.showPhotoModal = false;
     }
   }
 }
 </script>
 
 <style scoped>
-@import '../assets/theme.css';
-
 .team-score-row {
   background: rgba(0, 0, 0, 0.8);
-  color: var(--cyber-primary);
+  color: #0ff;
   transition: all 0.3s ease;
-  border-bottom: 1px solid var(--cyber-primary-alpha);
+  border-bottom: 1px solid #0ff3;
 }
 
 .row-hover {
@@ -235,12 +262,13 @@ export default {
   font-family: 'Orbitron', sans-serif;
   text-align: left;
   padding-left: 20px;
+  cursor: pointer;
 }
 
 .progress-container {
   width: 100%;
-  background: var(--cyber-primary-alpha);
-  border: 1px solid var(--cyber-primary-alpha);
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid #0ff3;
   height: 20px;
 }
 
@@ -334,7 +362,7 @@ export default {
   position: absolute;
   top: -10px;
   right: -15px;
-  background: var(--bubble-color);
+  background: #ff0080;
   color: #fff;
   border-radius: 50%;
   width: 24px;
@@ -344,7 +372,7 @@ export default {
   justify-content: center;
   font-size: 0.8em;
   font-weight: bold;
-  box-shadow: 0 0 10px var(--bubble-glow);
+  box-shadow: 0 0 10px #ff0080;
   z-index: 2;
 }
 
@@ -410,37 +438,87 @@ export default {
   transition: none;
 }
 
-/* 添加排名颜色样式 */
-.rank-top3 {
+.photo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  position: relative;
+  max-width: 80%;
+  max-height: 80vh;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #0ff;
+  font-size: 24px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #0ff;
+}
+
+.close-button:hover {
+  background: rgba(0, 255, 255, 0.2);
+}
+
+.rank-gold {
   color: var(--rank-top3) !important;
-  text-shadow: 0 0 5px var(--rank-top3-glow) !important;
+  text-shadow: 0 0 10px var(--rank-top3-glow);
 }
 
-.rank-top3 .team-name,
-.rank-top3 .rank {
-  color: var(--rank-top3) !important;
-  text-shadow: 0 0 5px var(--rank-top3-glow) !important;
-}
-
-.rank-top7 {
+.rank-silver {
   color: var(--rank-top7) !important;
-  text-shadow: 0 0 5px var(--rank-top7-glow) !important;
+  text-shadow: 0 0 10px var(--rank-top7-glow);
 }
 
-.rank-top7 .team-name,
-.rank-top7 .rank {
-  color: var(--rank-top7) !important;
-  text-shadow: 0 0 5px var(--rank-top7-glow) !important;
-}
-
-.rank-top15 {
+.rank-bronze {
   color: var(--rank-top15) !important;
-  text-shadow: 0 0 5px var(--rank-top15-glow) !important;
+  text-shadow: 0 0 10px var(--rank-top15-glow);
 }
 
-.rank-top15 .team-name,
-.rank-top15 .rank {
-  color: var(--rank-top15) !important;
-  text-shadow: 0 0 5px var(--rank-top15-glow) !important;
+.non-competing {
+  color: var(--cyber-primary) !important;
+  opacity: 0.7;
+}
+
+/* 增强整行的效果 */
+.team-score-row.rank-gold .team-name {
+  color: var(--rank-top3);
+}
+
+.team-score-row.rank-silver .team-name {
+  color: var(--rank-top7);
+}
+
+.team-score-row.rank-bronze .team-name {
+  color: var(--rank-top15);
 }
 </style>
